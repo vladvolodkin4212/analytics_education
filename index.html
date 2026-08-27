@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Самопроверка: SQL — модуль 1</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --card-bg: #ffffff;
+    --border: #e2e0d8;
+    --text-primary: #1f1f1d;
+    --text-secondary: #6b6a63;
+    --accent: #185fa5;
+    --accent-bg: #e6f1fb;
+    --green: #3b6d11;
+    --green-bg: #eaf3de;
+    --red: #a32d2d;
+    --red-bg: #fcebeb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px 64px;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 620px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 24px;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .progress-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.2s ease;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.15s ease;
+  }
+  .card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .card p {
+    font-size: 16px;
+    line-height: 1.65;
+    margin: 0;
+  }
+  .card.question p {
+    font-weight: 600;
+  }
+  .card.answer p {
+    color: var(--text-secondary);
+  }
+  .card-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+  .card-inner { width: 100%; }
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.12s ease, transform 0.05s ease;
+  }
+  button:hover { background: #f1efe8; }
+  button:active { transform: scale(0.98); }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  button.primary:hover { background: #14538f; }
+  button.known {
+    background: var(--green-bg);
+    color: var(--green);
+    border-color: var(--green-bg);
+  }
+  button.unknown {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: var(--red-bg);
+  }
+  .finish {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .finish .score {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .finish .detail {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Самопроверка по SQL</h1>
+  <p class="subtitle">Модуль 1 · 18 вопросов. Нажмите на карточку, чтобы увидеть ответ.</p>
+  <div id="app"></div>
+</div>
+
+<script>
+const cards = [
+{q:"Что такое JOIN и какие бывают?",a:"JOIN — объединение двух таблиц по условию ON. 6 видов: INNER (общие строки), LEFT (+ строки левой таблицы без пары), RIGHT (+ строки правой без пары), FULL OUTER (все строки обеих таблиц), CROSS (декартово произведение, без ON), SELF (таблица сама с собой)."},
+{q:"Чем отличаются COUNT(1), COUNT(*) и COUNT(some_column)?",a:"COUNT(1) = COUNT(*) — считают все строки, включая пустые. COUNT(some_column) — считает только непустые значения в этом поле."},
+{q:"Чем отличаются SELECT(1), SELECT(*) и SELECT(some_column)?",a:"SELECT(1) — выводит 1 в каждой строке. SELECT(*) — все поля таблицы. SELECT(some_column) — конкретное поле."},
+{q:"В чем разница между CROSS JOIN и INNER JOIN?",a:"CROSS JOIN — декартово произведение (M×N строк), ON не нужен. INNER JOIN — только строки с совпадением ключа."},
+{q:"Когда используется FULL OUTER JOIN?",a:"Когда нужны все строки из обеих таблиц: и с совпадениями, и без (в ячейках без пары — NULL)."},
+{q:"Таблицы 10 и 100 строк: min/max строк для INNER, LEFT, CROSS JOIN?",a:"INNER: min 0, max 1000. LEFT: min 10, max 1000. CROSS: всегда 1000 (10×100)."},
+{q:"Чем отличаются UNION и UNION ALL?",a:"UNION — вертикальное объединение с удалением дубликатов. UNION ALL — с сохранением дубликатов."},
+{q:"В каком порядке выполняются SQL-операции?",a:"FROM → JOIN → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT → OFFSET."},
+{q:"В чем отличие DELETE, TRUNCATE и DROP?",a:"DROP — удаляет таблицу целиком со структурой, мгновенно. DELETE — удаляет строки по WHERE, медленно на больших таблицах. TRUNCATE — удаляет все строки без условия, быстро, структура остаётся."},
+{q:"В чем отличие WHERE и HAVING?",a:"WHERE — фильтрация до агрегации (до GROUP BY). HAVING — фильтрация после агрегации (после GROUP BY)."},
+{q:"Какие типы оконных функций вы знаете?",a:"1) Агрегирующие: COUNT, MAX, MIN, AVG, SUM. 2) Ранжирующие: ROW_NUMBER, RANK, DENSE_RANK, NTILE(n). 3) Смещения: LAG, LEAD, FIRST_VALUE, LAST_VALUE, NTH_VALUE(n). Синтаксис: функция OVER (PARTITION BY, ORDER BY, ROWS BETWEEN)."},
+{q:"Какие типы агрегатных функций вы знаете?",a:"COUNT, SUM, AVG, MAX, MIN. Применяются вместе с GROUP BY, схлопывают строки в группы."},
+{q:"В чем разница между агрегатными и оконными функциями?",a:"Функции одни и те же, но агрегатные схлопывают строки в группы (с GROUP BY), оконные не схлопывают — сохраняют все строки и добавляют результат к каждой (с OVER())."},
+{q:"Какие способы создания таблицы вы знаете?",a:"CREATE TABLE — с нуля с типами столбцов. CREATE TABLE AS SELECT (CTAS) — из результата запроса. CREATE TEMPORARY TABLE — временная, живёт в рамках сессии. SELECT INTO — аналог CTAS."},
+{q:"Что такое CTE, для чего применяются?",a:"Common Table Expression — временный именованный результат запроса через WITH, живёт только в рамках одного запроса. Улучшает читаемость, заменяет подзапросы, поддерживает рекурсию (WITH RECURSIVE). Не хранится физически."},
+{q:"Что такое временная таблица (TEMPORARY TABLE)? Чем отличается от CTE?",a:"Физически создаётся в БД, живёт в рамках сессии, удаляется автоматически. Можно переиспользовать в нескольких запросах и добавлять индексы. В отличие от CTE — существует дольше одного запроса и на больших объёмах работает быстрее."},
+{q:"Что такое CONCAT, COALESCE, NULLIF?",a:"CONCAT — объединяет строки. COALESCE — возвращает первое ненулевое значение из списка (замена NULL на дефолт). NULLIF — возвращает NULL, если два аргумента равны, иначе первый аргумент (защита от деления на ноль)."},
+{q:"Какие способы оптимизации SQL-запросов ты знаешь?",a:"Фильтрация раньше (WHERE/PREWHERE до JOIN); SELECT только нужных столбцов; индексы по WHERE/JOIN; избегать функций на столбцах в WHERE; LIMIT для выборок; CTE вместо вложенных подзапросов; EXPLAIN ANALYZE; партиционирование; UNION ALL вместо UNION."}
+];
+
+let order = cards.map((_, i) => i);
+let pos = 0;
+let flipped = false;
+let known = new Set();
+let unknown = new Set();
+let finished = false;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function restart(reshuffle) {
+  order = reshuffle ? shuffle(cards.map((_, i) => i)) : cards.map((_, i) => i);
+  pos = 0;
+  flipped = false;
+  known = new Set();
+  unknown = new Set();
+  finished = false;
+  render();
+}
+
+function render() {
+  const app = document.getElementById('app');
+
+  if (finished) {
+    app.innerHTML = `
+      <div class="finish">
+        <div class="score">Готово: ${cards.length}/${cards.length}</div>
+        <div class="detail">Знал: ${known.size} · Стоит повторить: ${unknown.size}</div>
+        <div class="actions">
+          <button class="primary" id="btn-restart">Пройти заново</button>
+          <button id="btn-shuffle">Заново вперемешку</button>
+        </div>
+      </div>`;
+    document.getElementById('btn-restart').onclick = () => restart(false);
+    document.getElementById('btn-shuffle').onclick = () => restart(true);
+    return;
+  }
+
+  const idx = order[pos];
+  const card = cards[idx];
+  const progressPct = Math.round((pos / cards.length) * 100);
+
+  app.innerHTML = `
+    <div class="meta-row">
+      <span>Вопрос ${pos + 1} из ${cards.length}</span>
+      <span>Знал: ${known.size} · Не знал: ${unknown.size}</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+    <div class="card ${flipped ? 'answer' : 'question'}" id="card">
+      <div class="card-inner">
+        <span class="card-label">${flipped ? 'Ответ' : 'Вопрос'}</span>
+        <p>${flipped ? card.a : card.q}</p>
+      </div>
+    </div>
+    <div class="actions">
+      ${flipped ? '' : '<button class="primary" id="btn-flip">Показать ответ</button>'}
+    </div>
+    <div class="actions" style="display:${flipped ? 'flex' : 'none'}">
+      <button class="known" id="btn-known">✓ Знал</button>
+      <button class="unknown" id="btn-unknown">✕ Не знал</button>
+    </div>
+  `;
+
+  const cardEl = document.getElementById('card');
+  cardEl.onclick = () => { if (!flipped) { flipped = true; render(); } };
+
+  const flipBtn = document.getElementById('btn-flip');
+  if (flipBtn) flipBtn.onclick = (e) => { e.stopPropagation(); flipped = true; render(); };
+
+  const knownBtn = document.getElementById('btn-known');
+  const unknownBtn = document.getElementById('btn-unknown');
+  if (knownBtn) knownBtn.onclick = (e) => { e.stopPropagation(); known.add(idx); unknown.delete(idx); advance(); };
+  if (unknownBtn) unknownBtn.onclick = (e) => { e.stopPropagation(); unknown.add(idx); known.delete(idx); advance(); };
+}
+
+function advance() {
+  if (pos + 1 >= order.length) { finished = true; }
+  else { pos += 1; flipped = false; }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
