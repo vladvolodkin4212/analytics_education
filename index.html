@@ -220,9 +220,13 @@ function render() {
           <button class="primary" id="btn-restart">Пройти заново</button>
           <button id="btn-shuffle">Заново вперемешку</button>
         </div>
+        <div class="actions" style="margin-top:8px;">
+          <button id="btn-prev-finish">← Вернуться к вопросам</button>
+        </div>
       </div>`;
     document.getElementById('btn-restart').onclick = () => restart(false);
     document.getElementById('btn-shuffle').onclick = () => restart(true);
+    document.getElementById('btn-prev-finish').onclick = () => { finished = false; pos = order.length - 1; flipped = false; render(); };
     return;
   }
 
@@ -249,6 +253,9 @@ function render() {
       <button class="known" id="btn-known">✓ Знал</button>
       <button class="unknown" id="btn-unknown">✕ Не знал</button>
     </div>
+    <div class="actions" style="margin-top:8px;">
+      ${pos > 0 ? '<button id="btn-prev">← Предыдущий вопрос</button>' : ''}
+    </div>
   `;
 
   const cardEl = document.getElementById('card');
@@ -261,12 +268,23 @@ function render() {
   const unknownBtn = document.getElementById('btn-unknown');
   if (knownBtn) knownBtn.onclick = (e) => { e.stopPropagation(); known.add(idx); unknown.delete(idx); advance(); };
   if (unknownBtn) unknownBtn.onclick = (e) => { e.stopPropagation(); unknown.add(idx); known.delete(idx); advance(); };
+
+  const prevBtn = document.getElementById('btn-prev');
+  if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); goBack(); };
 }
 
 function advance() {
   if (pos + 1 >= order.length) { finished = true; }
   else { pos += 1; flipped = false; }
   render();
+}
+
+function goBack() {
+  if (pos > 0) {
+    pos -= 1;
+    flipped = false;
+    render();
+  }
 }
 
 render();
