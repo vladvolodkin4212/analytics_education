@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Самопроверка: Python/Pandas — модуль 2</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --card-bg: #ffffff;
+    --border: #e2e0d8;
+    --text-primary: #1f1f1d;
+    --text-secondary: #6b6a63;
+    --accent: #185fa5;
+    --accent-bg: #e6f1fb;
+    --green: #3b6d11;
+    --green-bg: #eaf3de;
+    --red: #a32d2d;
+    --red-bg: #fcebeb;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px 64px;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 620px;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 24px;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .progress-track {
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.2s ease;
+  }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    min-height: 160px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.15s ease;
+  }
+  .card:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+  .card p {
+    font-size: 16px;
+    line-height: 1.65;
+    margin: 0;
+  }
+  .card.question p {
+    font-weight: 600;
+  }
+  .card.answer p {
+    color: var(--text-secondary);
+  }
+  .card-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-bg);
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+  .card-inner { width: 100%; }
+  .actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.12s ease, transform 0.05s ease;
+  }
+  button:hover { background: #f1efe8; }
+  button:active { transform: scale(0.98); }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  button.primary:hover { background: #14538f; }
+  button.known {
+    background: var(--green-bg);
+    color: var(--green);
+    border-color: var(--green-bg);
+  }
+  button.unknown {
+    background: var(--red-bg);
+    color: var(--red);
+    border-color: var(--red-bg);
+  }
+  .finish {
+    text-align: center;
+    padding: 40px 0;
+  }
+  .finish .score {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .finish .detail {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Самопроверка по Python / Pandas</h1>
+  <p class="subtitle">Модуль 2 · 14 вопросов. Нажмите на карточку, чтобы увидеть ответ.</p>
+  <div id="app"></div>
+</div>
+
+<script>
+const cards = [
+{q:"Какие типы данных существуют в Python?",a:"Изменяемые (mutable): list, dict, set. Неизменяемые (immutable): int, float, bool, str, tuple, frozenset, NoneType."},
+{q:"Чем list отличается от tuple?",a:"Изменяемость: list — изменяемый, tuple — неизменяемый. Скорость: tuple работает быстрее и занимает меньше памяти. Применение: list — когда данные нужно менять, tuple — для неизменяемых наборов (координаты, константы)."},
+{q:"Что такое dict и как он устроен?",a:"Словарь — структура ключ-значение. Ключи должны быть неизменяемыми (str, int, tuple), значения — любые. С Python 3.7 сохраняет порядок вставки. Методы: .keys(), .values(), .items(), .get(key, default). Доступ по ключу O(1) за счёт хэш-таблицы."},
+{q:"Чем list отличается от set?",a:"list — упорядоченная коллекция, допускает дубликаты, доступ по индексу O(1). set — неупорядоченная коллекция уникальных элементов, не допускает дубликаты, проверка наличия O(1). set используют для удаления дубликатов или быстрой проверки наличия."},
+{q:"Что такое list comprehension и когда его использовать?",a:"Краткая запись для создания списка: [x*2 for x in range(10) if x > 3]. Используют для создания нового списка на основе другого с фильтрацией/преобразованием — работает быстрее обычного цикла for. Аналогично есть dict comprehension и set comprehension."},
+{q:"Что такое lambda-функция?",a:"Анонимная функция в одну строку: lambda x: x*2. Используется для простой логики без повторного использования, чаще в связке с map(), filter(), sorted(). Для сложной логики лучше обычная функция def."},
+{q:"Чем == отличается от is?",a:"== проверяет равенство значений (1 == 1.0 → True). is проверяет идентичность объектов в памяти — один ли это объект (a is b → True только если указывают на один объект). is используют для сравнения с None (if x is None)."},
+{q:"Что такое pandas и какие основные операции ты используешь?",a:"Библиотека для работы с табличными данными. Операции: чтение (read_csv, read_excel), фильтрация, группировка (groupby+agg), объединение (merge, concat, join), обработка пропусков (isna, fillna, dropna), новые столбцы, сортировка (sort_values), apply/map. DataFrame — таблица, Series — столбец. Просмотр: head(), sample(), shape, columns, dtypes, info(), describe(), value_counts(), unique(), nunique()."},
+{q:"В чём разница между merge, join и concat?",a:"merge — объединение по столбцам-ключам (аналог SQL JOIN), поддерживает inner/left/right/outer. join — объединение по индексу (по умолчанию left join). concat — простое склеивание DataFrame по строкам/столбцам без сопоставления по ключу."},
+{q:"Как работает groupby().agg() с несколькими функциями и столбцами?",a:"agg() применяет разные агрегатные функции к разным столбцам: df.groupby('cat').agg({'price':'mean','qty':'sum'}). Можно несколько функций к одному столбцу: .agg(['mean','max','min']). Есть именованная агрегация: .agg(avg_price=('price','mean'), total_qty=('qty','sum')) — для читаемых названий итоговых столбцов."},
+{q:"Способы обработки пропусков: fillna, dropna — когда что уместно?",a:"fillna — заполняет пропуски заданным значением, средним/медианой, либо соседним значением (method='ffill'/'bfill') — используют когда пропусков немного и есть логичная замена. dropna — удаляет строки/столбцы с пропусками — уместно когда пропусков мало и удаление не искажает выборку, либо когда пропуск в критически важном поле."},
+{q:"duplicated() и drop_duplicates() — как искать и убирать дубликаты?",a:"duplicated() возвращает булеву маску дубликатов (можно указать subset=[...]). Параметр keep определяет, какое повторение считать НЕ дубликатом: 'first' (по умолчанию), 'last', False (пометить все). drop_duplicates() сразу удаляет дубликаты с той же логикой subset и keep."},
+{q:"Чем отличаются loc и iloc в pandas?",a:"loc — выборка данных по меткам (названиям) строк и столбцов: df.loc[0, 'name'] — строка с индексом 0, столбец name. df.loc[df['age'] > 18] — фильтрация по условию. iloc — выборка данных по порядковым номерам строк и столбцов (как в обычном списке): df.iloc[0, 1] — первая строка, второй столбец. df.iloc[0:5, 0:3] — первые 5 строк, первые 3 столбца. Главное отличие: loc работает с метками и включает последний элемент среза, iloc работает с позициями и не включает последний элемент среза (как в Python списках)."},
+{q:"Какие библиотеки визуализации знаешь и основные типы графиков?",a:"matplotlib (базовая, гибкая настройка) и seaborn (надстройка, красивые графики для анализа). Графики: Boxplot (распределение и выбросы), Histogram (распределение числовых данных), Barplot (среднее по категориям), Countplot (количество по категориям), Scatterplot (корреляция двух переменных), Pairplot (сравнение нескольких переменных), Heatmap (корреляции признаков, часто с df.corr()), Lineplot (временные ряды), KDE Plot (сглаженная плотность распределения)."}
+];
+
+let order = cards.map((_, i) => i);
+let pos = 0;
+let flipped = false;
+let known = new Set();
+let unknown = new Set();
+let finished = false;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function restart(reshuffle) {
+  order = reshuffle ? shuffle(cards.map((_, i) => i)) : cards.map((_, i) => i);
+  pos = 0;
+  flipped = false;
+  known = new Set();
+  unknown = new Set();
+  finished = false;
+  render();
+}
+
+function render() {
+  const app = document.getElementById('app');
+
+  if (finished) {
+    app.innerHTML = `
+      <div class="finish">
+        <div class="score">Готово: ${cards.length}/${cards.length}</div>
+        <div class="detail">Знал: ${known.size} · Стоит повторить: ${unknown.size}</div>
+        <div class="actions">
+          <button class="primary" id="btn-restart">Пройти заново</button>
+          <button id="btn-shuffle">Заново вперемешку</button>
+        </div>
+        <div class="actions" style="margin-top:8px;">
+          <button id="btn-prev-finish">← Вернуться к вопросам</button>
+        </div>
+      </div>`;
+    document.getElementById('btn-restart').onclick = () => restart(false);
+    document.getElementById('btn-shuffle').onclick = () => restart(true);
+    document.getElementById('btn-prev-finish').onclick = () => { finished = false; pos = order.length - 1; flipped = false; render(); };
+    return;
+  }
+
+  const idx = order[pos];
+  const card = cards[idx];
+  const progressPct = Math.round((pos / cards.length) * 100);
+
+  app.innerHTML = `
+    <div class="meta-row">
+      <span>Вопрос ${pos + 1} из ${cards.length}</span>
+      <span>Знал: ${known.size} · Не знал: ${unknown.size}</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+    <div class="card ${flipped ? 'answer' : 'question'}" id="card">
+      <div class="card-inner">
+        <span class="card-label">${flipped ? 'Ответ' : 'Вопрос'}</span>
+        <p>${flipped ? card.a : card.q}</p>
+      </div>
+    </div>
+    <div class="actions">
+      ${flipped ? '' : '<button class="primary" id="btn-flip">Показать ответ</button>'}
+    </div>
+    <div class="actions" style="display:${flipped ? 'flex' : 'none'}">
+      <button class="known" id="btn-known">✓ Знал</button>
+      <button class="unknown" id="btn-unknown">✕ Не знал</button>
+    </div>
+    <div class="actions" style="margin-top:8px;">
+      ${pos > 0 ? '<button id="btn-prev">← Предыдущий вопрос</button>' : ''}
+    </div>
+  `;
+
+  const cardEl = document.getElementById('card');
+  cardEl.onclick = () => { if (!flipped) { flipped = true; render(); } };
+
+  const flipBtn = document.getElementById('btn-flip');
+  if (flipBtn) flipBtn.onclick = (e) => { e.stopPropagation(); flipped = true; render(); };
+
+  const knownBtn = document.getElementById('btn-known');
+  const unknownBtn = document.getElementById('btn-unknown');
+  if (knownBtn) knownBtn.onclick = (e) => { e.stopPropagation(); known.add(idx); unknown.delete(idx); advance(); };
+  if (unknownBtn) unknownBtn.onclick = (e) => { e.stopPropagation(); unknown.add(idx); known.delete(idx); advance(); };
+
+  const prevBtn = document.getElementById('btn-prev');
+  if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); goBack(); };
+}
+
+function advance() {
+  if (pos + 1 >= order.length) { finished = true; }
+  else { pos += 1; flipped = false; }
+  render();
+}
+
+function goBack() {
+  if (pos > 0) {
+    pos -= 1;
+    flipped = false;
+    render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
